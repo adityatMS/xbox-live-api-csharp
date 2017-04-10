@@ -25,7 +25,7 @@ namespace Microsoft.Xbox.Services.UnitTests.TitleStorage
         {
             base.TestInitialize();
             MockXboxLiveData.Load(Environment.CurrentDirectory + "\\TitleStorage\\TitleStorageUT.json");
-            this.titleStorageService = new TitleStorageService(new XboxLiveContextSettings(), XboxLiveAppConfiguration.Instance);
+            this.titleStorageService = new TitleStorageService();
         }
 
         [TestMethod]

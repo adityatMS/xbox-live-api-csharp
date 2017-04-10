@@ -15,7 +15,6 @@ namespace Microsoft.Xbox.Services.TitleStorage
     /// </summary>
     public class TitleStorageService: ITitleStorageService
     {
-        private readonly XboxLiveContextSettings xboxLiveContextSettings;
         private readonly XboxLiveAppConfiguration appConfig;
         private static readonly Uri TitleStorageBaseUri = new Uri("https://titlestorage.xboxlive.com");
 
@@ -32,12 +31,10 @@ namespace Microsoft.Xbox.Services.TitleStorage
         /// <summary>
         /// Initializes a new instance of <see cref="TitleStorageService"/> class.
         /// </summary>
-        /// <param name="xboxLiveContextSettings">Xbox Live Context Settings</param>
         /// <param name="appConfig">Xbox Live App Configuration</param>
-        public TitleStorageService(XboxLiveContextSettings xboxLiveContextSettings, XboxLiveAppConfiguration appConfig)
+        public TitleStorageService()
         {
-            this.xboxLiveContextSettings = xboxLiveContextSettings;
-            this.appConfig = appConfig;
+            this.appConfig = XboxLive.Instance.AppConfig;
         }
 
         /// <summary>
@@ -51,7 +48,7 @@ namespace Microsoft.Xbox.Services.TitleStorage
         public Task<TitleStorageQuota> GetQuotaAsync(XboxLiveUser user, TitleStorageType storageType)
         {
             var subQuery = this.GetTitleStorageSubpath(user, storageType);
-            var httpRequest = XboxLiveHttpRequest.Create(this.xboxLiveContextSettings, HttpMethod.Get, TitleStorageBaseUri.ToString(), subQuery);
+            var httpRequest = XboxLiveHttpRequest.Create(HttpMethod.Get, TitleStorageBaseUri.ToString(), subQuery);
             httpRequest.ContractVersion = TitleStorageApiContract;
 
             return httpRequest.GetResponseWithAuth(user).ContinueWith(
@@ -96,7 +93,7 @@ namespace Microsoft.Xbox.Services.TitleStorage
                 return Task.FromResult<object>(null);
             }
 
-            var httpRequest = XboxLiveHttpRequest.Create(this.xboxLiveContextSettings, HttpMethod.Delete, TitleStorageBaseUri.ToString(), subPathAndQueryResult);
+            var httpRequest = XboxLiveHttpRequest.Create(HttpMethod.Delete, TitleStorageBaseUri.ToString(), subPathAndQueryResult);
             httpRequest.ContractVersion = TitleStorageApiContract;
             httpRequest.ContentType = ContentTypeHeaderValue;
             
@@ -143,7 +140,7 @@ namespace Microsoft.Xbox.Services.TitleStorage
 
             while (isDownloading)
             {
-                var httpRequest = XboxLiveHttpRequest.Create(this.xboxLiveContextSettings, HttpMethod.Get, TitleStorageBaseUri.ToString(), subPathAndQueryResult);
+                var httpRequest = XboxLiveHttpRequest.Create(HttpMethod.Get, TitleStorageBaseUri.ToString(), subPathAndQueryResult);
                 httpRequest.ContractVersion = TitleStorageApiContract;
                 httpRequest.ContentType = ContentTypeHeaderValue;
                 httpRequest.longHttpCall = true;
@@ -234,7 +231,7 @@ namespace Microsoft.Xbox.Services.TitleStorage
                 }
 
                 var subpathAndQueryResult = this.GetTitleStorageBlobMetadataUploadSubpath(user, blobMetadata, continuationToken, isFinalBlock);
-                var httpRequest = XboxLiveHttpRequest.Create(this.xboxLiveContextSettings, HttpMethod.Put, TitleStorageBaseUri.ToString(), subpathAndQueryResult);
+                var httpRequest = XboxLiveHttpRequest.Create(HttpMethod.Put, TitleStorageBaseUri.ToString(), subpathAndQueryResult);
                 httpRequest.ContractVersion = TitleStorageApiContract;
                 httpRequest.ContentType = ContentTypeHeaderValue;
                 httpRequest.longHttpCall = true;
@@ -289,7 +286,7 @@ namespace Microsoft.Xbox.Services.TitleStorage
                 maxItems,
                 continuationToken);
 
-            var httpRequest = XboxLiveHttpRequest.Create(this.xboxLiveContextSettings, HttpMethod.Get, TitleStorageBaseUri.ToString(), subPathAndQueryResult);
+            var httpRequest = XboxLiveHttpRequest.Create(HttpMethod.Get, TitleStorageBaseUri.ToString(), subPathAndQueryResult);
             httpRequest.ContractVersion = TitleStorageApiContract;
             return httpRequest.GetResponseWithAuth(user)
                 .ContinueWith(
@@ -304,8 +301,11 @@ namespace Microsoft.Xbox.Services.TitleStorage
         {
             var response = responseTask.Result;
             return TitleStorageBlobMetadataResult.Deserialize(
-                response.ResponseBodyString, storageType, user,
-                this.xboxLiveContextSettings, blobPath);
+                response.ResponseBodyString, 
+                storageType, 
+                user,
+                blobPath
+                );
         }
 
         internal string GetTitleStorageSubpath(XboxLiveUser user, TitleStorageType titleStorageType)

@@ -59,15 +59,14 @@ namespace Microsoft.Xbox.Services.TitleStorage
         /// <param name="json">JSON string</param>
         /// <param name="storageType">Type of title storage </param>
         /// <param name="xboxUser">The Xbox User of the player the files belongs to.</param>
-        /// <param name="xboxLiveContextSettings">Xbox Live Context Settings</param>
         /// <param name="blobPath">The full path to to the blob.  examples: "gameconfig.json" and "user/settings/playerconfiguration.json".</param>
         /// <returns></returns>
         public static TitleStorageBlobMetadataResult Deserialize(
             string json,  
             TitleStorageType storageType,
             XboxLiveUser xboxUser,
-            XboxLiveContextSettings xboxLiveContextSettings,
-            string blobPath)
+            string blobPath
+            )
         { 
             var titleStorageBlobMetadataResultInfo = JsonSerialization.FromJson<TitleStorageBlobMetadataResultInfo>(json);
 
